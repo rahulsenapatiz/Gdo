@@ -1,22 +1,31 @@
-name: First Workflow
+name: Run Java App
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  first_job:
+  run-app:
     runs-on: ubuntu-latest
     steps:
-      - name: git checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: welcome message
-        run: echo "Hello"
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: list_files
-        run: ls
+      - name: Build with Maven
+        run: mvn clean package
 
-      - name: read file
-        run: cat README.md
+      - name: Run Java App in Background
+        run: |
+          mvn exec:java &
+          sleep 5
+
+      - name: Test with curl
+        run: curl http://localhost:8080
