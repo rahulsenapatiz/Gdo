@@ -1,31 +1,42 @@
+# The display name shown in the GitHub Actions tab
 name: Run Java App
 
+# Event triggers: When should this script execute?
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main              # Runs automatically whenever code is pushed to 'main'
+  workflow_dispatch:      # Adds a manual "Run workflow" button in the GitHub UI
 
+# Top-level container for all automation tasks
 jobs:
   run-app:
+    # Requests a fresh, isolated Ubuntu Linux virtual machine from GitHub's pool
     runs-on: ubuntu-latest
+
+    # The sequential commands executed inside that VM
     steps:
+      # Step 1: Clones your repository into the runner's workspace directory ($GITHUB_WORKSPACE)
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Installs and sets up JDK 17 (Eclipse Temurin) on the Ubuntu VM
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # Step 3: Compiles the code and creates the target build files using Maven
       - name: Build with Maven
         run: mvn clean package
 
+      # Step 4: Runs the server in the background and pauses for 5 seconds
       - name: Run Java App in Background
         run: |
           mvn exec:java &
           sleep 5
 
+      # Step 5: Sends an HTTP GET request to localhost:8080 and prints the output
       - name: Test with curl
         run: curl http://localhost:8080
